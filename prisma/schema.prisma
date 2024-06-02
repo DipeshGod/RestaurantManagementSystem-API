@@ -77,4 +77,65 @@ model Restaurant {
 
   adminId Int
   User    User @relation(fields: [adminId], references: [id])
+
+  MenuCategory MenuCategory[]
+  MenuItem     MenuItem[]
+  Order        Order[]
+}
+
+model MenuCategory {
+  id Int @id @default(autoincrement())
+
+  name         String
+  restaurantId Int
+  Restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  MenuItem  MenuItem[]
+  Order     Order[]
+}
+
+model MenuItem {
+  id Int @id @default(autoincrement())
+
+  name         String
+  price        Decimal
+  availability Boolean @default(true)
+
+  restaurantId   Int
+  Restaurant     Restaurant   @relation(fields: [restaurantId], references: [id])
+  menuCategoryId Int
+  MenuCategory   MenuCategory @relation(fields: [menuCategoryId], references: [id])
+  Order          Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum OrderStatusType {
+  created
+  onRoute
+  cancelleted
+  returned
+  completed
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  longitude Decimal?
+  latitude  Decimal?
+
+  restaurantId   Int
+  Restaurant     Restaurant   @relation(fields: [restaurantId], references: [id])
+  menuCategoryId Int
+  MenuCategory   MenuCategory @relation(fields: [menuCategoryId], references: [id])
+  menuItemId     Int
+  MenuItem       MenuItem     @relation(fields: [menuItemId], references: [id])
+
+  status OrderStatusType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
