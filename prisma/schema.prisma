@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,76 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Represents features of the app
+model Resource {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  RolePermissions RolePermissions[]
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  RolePermissions RolePermissions[]
+  User            User[]
+}
+
+model RolePermissions {
+  id         Int    @id @default(autoincrement())
+  roleId     Int
+  name       String
+  resourceId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  Resource Resource? @relation(fields: [resourceId], references: [id])
+  Role     Role      @relation(fields: [roleId], references: [id])
+}
+
+enum UserType {
+  sysAdmin
+  restaurantAdmin
+  kitchenOrderManager
+  barOrderManager
+  inventoryManager
+  customer
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique()
+  password String
+  phone    String?  @unique()
+  type     UserType
+  roleId   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  Role       Role?        @relation(fields: [roleId], references: [id])
+  Restaurant Restaurant[]
+}
+
+model Restaurant {
+  id Int @id @default(autoincrement())
+
+  name      String  @unique
+  longitude Decimal
+  latitude  Decimal
+
+  adminId Int
+  User    User @relation(fields: [adminId], references: [id])
 }
